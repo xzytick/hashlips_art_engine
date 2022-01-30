@@ -73,9 +73,6 @@ const getElements = (path) => {
     .readdirSync(path)
     .filter((item) => !/(^|\/)\.[^\/\.]/g.test(item))
     .map((i, index) => {
-      if (i.includes("-")) {
-        throw new Error(`layer name can not contain dashes, please fix: ${i}`);
-      }
       return {
         id: index,
         name: cleanName(i),
@@ -139,7 +136,7 @@ const addMetadata = (_dna, _edition) => {
     date: dateTime,
     ...extraMetadata,
     attributes: attributesList,
-    compiler: "HashLips Art Engine",
+
   };
   if (network == NETWORK.sol) {
     tempMetadata = {
@@ -149,16 +146,20 @@ const addMetadata = (_dna, _edition) => {
       description: tempMetadata.description,
       //Added metadata for solana
       seller_fee_basis_points: solanaMetadata.seller_fee_basis_points,
-      image: `${_edition}.png`,
+      image: _edition+".png",
       //Added metadata for solana
       external_url: solanaMetadata.external_url,
       edition: _edition,
       ...extraMetadata,
       attributes: tempMetadata.attributes,
+      collection: {
+        name: namePrefix, 
+        family: namePrefix,
+      },
       properties: {
         files: [
           {
-            uri: `${_edition}.png`,
+            uri:  _edition+".png",
             type: "image/png",
           },
         ],
@@ -180,14 +181,10 @@ const addAttributes = (_element) => {
 };
 
 const loadLayerImg = async (_layer) => {
-  try {
-    return new Promise(async (resolve) => {
-      const image = await loadImage(`${_layer.selectedElement.path}`);
-      resolve({ layer: _layer, loadedImage: image });
-    });
-  } catch (error) {
-    console.error("Error loading image:", error);
-  }
+  return new Promise(async (resolve) => {
+    const image = await loadImage(`${_layer.selectedElement.path}`);
+    resolve({ layer: _layer, loadedImage: image });
+  });
 };
 
 const addText = (_sig, x, y, size) => {
